@@ -9,6 +9,7 @@ TrackingLink is React component that helps to track clicks for links on the page
 * Supports ctrl/cmd + click to open url in a new tab/window
 * Navigates to the URL when tracking function is resolved or when the timeout is resolved first (this helps to avoid problems with analytics-blocking browser extensions or when your tracking function has failed)
 * Fixes the issue with the context menu in Firefox and mobile Chrome, when the right click (or long click on mobile) upon the link triggers click event
+* Configurable timeouts
 
 ### Installation
 
@@ -53,6 +54,7 @@ Now when you click the image, TrackingLink will call your tracking function and 
  
 ```javascript
 propTypes = {
+  // a React node you want to wrap into <a> link
   children: PropTypes.node.isRequired,
   // href - url where navigate when tracking function is resolved
   href: PropTypes.string.isRequired,
@@ -64,6 +66,10 @@ propTypes = {
   targetBlank: PropTypes.bool,
   // don't navigate to the url (default = false)
   preventDefault: PropTypes.bool,
+  // timeout (ms) to which the tracking function is limited (default = 500)
+  trackingTimeout: PropTypes.number,
+  // timeout (ms) that prevents click events to happen when a user opens context menu (default = 300)
+  contextMenuTimeout: PropTypes.number,
 };
 ```
 
