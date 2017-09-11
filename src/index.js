@@ -7,8 +7,8 @@ export const CONTEXT_MENU_TIMEOUT = 300; // ms
 
 export default class TrackingLink extends Component {
   static propTypes = {
-    children: PropTypes.node,
-    href: PropTypes.string,
+    children: PropTypes.node.isRequired,
+    href: PropTypes.string.isRequired,
     className: PropTypes.string,
     onTouchTap: PropTypes.func,
     targetBlank: PropTypes.bool,
