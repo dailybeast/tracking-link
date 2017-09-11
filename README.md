@@ -1,7 +1,7 @@
 TrackingLink
 =======
 
-[![npm Version](https://img.shields.io/npm/v/enzyme.svg)](https://www.npmjs.com/package/enzyme) [![License](https://img.shields.io/npm/l/enzyme.svg)](https://www.npmjs.com/package/enzyme) [![Build Status](https://travis-ci.org/airbnb/enzyme.svg)](https://travis-ci.org/airbnb/enzyme)
+[![npm Version](https://img.shields.io/npm/v/tracking-link.svg)](https://www.npmjs.com/package/tracking-link) [![License](https://img.shields.io/npm/l/tracking-link.svg)](https://www.npmjs.com/package/tracking-link)
 
 TrackingLink is React component that helps to track clicks for links on the page.
 
@@ -66,3 +66,7 @@ propTypes = {
   preventDefault: PropTypes.bool,
 };
 ```
+
+Made by [The Daily Beast](https://thedailybeast.com) team
+
+<img src="https://pbs.twimg.com/profile_images/862673271212441600/u_DNSQ_Q.jpg" width="220" />
