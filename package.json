@@ -1,0 +1,63 @@
+{
+  "name": "tracking-link",
+  "version": "1.0.0",
+  "description": "React component that helps to track clicks for links",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "babel src --out-dir dist",
+    "prepublish": "npm run test && npm run build",
+    "lint": "eslint src",
+    "ava": "NODE_ENV=test ava --verbose",
+    "test": "npm run lint && npm run ava"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dailybeast/tracking-link.git"
+  },
+  "keywords": [
+    "tracking",
+    "link",
+    "react",
+    "component",
+    "dailybeast"
+  ],
+  "author": "The Daily Beast team",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/dailybeast/tracking-link/issues"
+  },
+  "homepage": "https://github.com/dailybeast/tracking-link#readme",
+  "dependencies": {
+    "classnames": "^2.2.5",
+    "prop-types": "^15.5.10",
+    "react": "^15.6.1"
+  },
+  "devDependencies": {
+    "ava": "^0.22.0",
+    "babel-cli": "^6.26.0",
+    "babel-eslint": "^7.2.3",
+    "babel-plugin-transform-class-properties": "^6.24.1",
+    "babel-preset-env": "^1.6.0",
+    "babel-preset-react": "^6.24.1",
+    "enzyme": "^2.9.1",
+    "eslint": "^4.6.1",
+    "eslint-config-airbnb": "^15.1.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^6.0.2",
+    "eslint-plugin-react": "^7.3.0",
+    "react-dom": "^15.6.1",
+    "react-test-renderer": "^15.6.1",
+    "sinon": "^3.2.1"
+  },
+  "ava": {
+    "babel": "inherit",
+    "concurrency": 5,
+    "files": [
+      "test/**/*-test.js"
+    ],
+    "require": [
+      "babel-register",
+      "babel-polyfill"
+    ]
+  }
+}
