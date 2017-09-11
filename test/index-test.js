@@ -2,7 +2,7 @@ import React from 'react';
 import test from 'ava';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
-import TrackingLink, { CONTEXT_MENU_TIMEOUT } from '../src';
+import TrackingLink from '../src';
 
 const CLASSNAME = 'test-class';
 const URL = 'something.org/path';
@@ -20,6 +20,8 @@ test.beforeEach(() => {
       onTouchTap={onTouchTapStub}
       targetBlank={false}
       preventDefault={false}
+      trackingTimeout={0}
+      contextMenuTimeout={0}
     >
       <button className="tracked-button" />
     </TrackingLink>
@@ -69,7 +71,7 @@ test.cb('onContextMenu() sets `preventTouchTap` state to true and sets timeout a
   global.setTimeout(() => {
     t.false(instance.state.preventTouchTap);
     t.end();
-  }, CONTEXT_MENU_TIMEOUT);
+  }, 0);
 });
 
 test.serial('onTouchTap() calls `onTouchTap` prop and then calls navigateToUrl() with nativeEvent', async t => {

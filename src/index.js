@@ -2,9 +2,6 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 
-export const TRACKING_TIMEOUT = 500; // ms
-export const CONTEXT_MENU_TIMEOUT = 300; // ms
-
 export default class TrackingLink extends Component {
   static propTypes = {
     children: PropTypes.node.isRequired,
@@ -13,6 +10,13 @@ export default class TrackingLink extends Component {
     onTouchTap: PropTypes.func,
     targetBlank: PropTypes.bool,
     preventDefault: PropTypes.bool,
+    trackingTimeout: PropTypes.number,
+    contextMenuTimeout: PropTypes.number,
+  };
+
+  static defaultProps = {
+    trackingTimeout: 500, // ms
+    contextMenuTimeout: 300, // ms
   };
 
   /* istanbul ignore next */
@@ -49,7 +53,7 @@ export default class TrackingLink extends Component {
 
     global.setTimeout(() => {
       this.setState({ preventTouchTap: false });
-    }, CONTEXT_MENU_TIMEOUT);
+    }, this.props.contextMenuTimeout);
   }
 
   onTouchTap(ev) {
@@ -59,14 +63,14 @@ export default class TrackingLink extends Component {
       return false;
     }
 
-    const { onTouchTap: trackingFunction } = this.props;
+    const { onTouchTap: trackingFunction, trackingTimeout } = this.props;
 
     // try to track the click but with the timeout
     // in case of tracking-blocking browser extensions or failure to load analytics scripts
     return Promise
       .race([
         trackingFunction(),
-        this.resolveByTimeout(TRACKING_TIMEOUT),
+        this.resolveByTimeout(trackingTimeout),
       ])
       .then(this.navigateToUrl(event));
   }
