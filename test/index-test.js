@@ -39,34 +39,70 @@ test('renders link element with className=`TrackingLink`', t => {
 
   trackingLink.setProps({ onTouchTap: undefined });
   t.is(trackingLink.prop('onTouchTap'), undefined);
+
+  t.is(typeof trackingLink.node.ref, 'function');
+
+  const linkEl = 'linkEl';
+  trackingLink.node.ref(linkEl);
+
+  t.is(instance.linkEl, linkEl);
 });
 
 test('renders children', t => {
   t.is(trackingLink.find('.tracked-button').length, 1);
 });
 
-test('componentDidMount() calls addGlobalEvents()', async t => {
-  instance.addGlobalEvents = sinon.spy();
+test('componentDidMount() calls addEvents()', async t => {
+  instance.addEvents = sinon.spy();
 
   instance.componentDidMount();
 
-  t.true(instance.addGlobalEvents.calledOnce);
+  t.true(instance.addEvents.calledOnce);
 });
 
-test('componentWillUnmount() calls removeGlobalEvents()', async t => {
-  instance.removeGlobalEvents = sinon.spy();
+test('componentWillUnmount() calls removeEvents()', async t => {
+  instance.removeEvents = sinon.spy();
 
   instance.componentWillUnmount();
 
-  t.true(instance.removeGlobalEvents.calledOnce);
+  t.true(instance.removeEvents.calledOnce);
 });
 
-test.cb('onContextMenu() sets `preventTouchTap` state to true and sets timeout after which sets `preventTouchTap` state to true', t => {
+test.cb('onContextMenu() sets `preventTouchTap` state to true and sets timeout after which sets `preventTouchTap` state to false', t => {
   t.false(instance.state.preventTouchTap);
 
   instance.onContextMenu();
 
   t.true(instance.state.preventTouchTap);
+
+  global.setTimeout(() => {
+    t.false(instance.state.preventTouchTap);
+    t.end();
+  }, 0);
+});
+
+test.serial('onLongTouch() sets `preventTouchTap` state to true', t => {
+  instance.setState({ preventTouchTap: false });
+
+  instance.onLongTouch();
+
+  t.true(instance.state.preventTouchTap);
+});
+
+test.serial('onTouchStart() starts timer and assigns its id to the `longTouchTimer` instance variable', t => {
+  instance.longTouchTimer = 0;
+
+  instance.onTouchStart();
+
+  t.true(instance.longTouchTimer !== 0);
+
+  global.clearTimeout(instance.longTouchTimer);
+});
+
+test.cb('onTouchEnd() sets timeout after which sets `preventTouchTap` state to false', t => {
+  instance.setState({ preventTouchTap: true });
+
+  instance.onContextMenu();
 
   global.setTimeout(() => {
     t.false(instance.state.preventTouchTap);
@@ -100,24 +136,34 @@ test.serial('onTouchTap() does not call navigateToUrl() when `preventTouchTap` i
   t.false(instance.navigateToUrl.calledOnce);
 });
 
-test('addGlobalEvents() adds event listener for `contextmenu`', t => {
+test('addEvents() adds event listener for `contextmenu` and touch events for the link element', t => {
   global.window = {
     addEventListener: sinon.spy(),
   };
+  instance.linkEl = {
+    addEventListener: sinon.spy(),
+  };
 
-  instance.addGlobalEvents();
+  instance.addEvents();
 
   t.true(global.window.addEventListener.calledWith('contextmenu', instance.onContextMenu));
+  t.true(instance.linkEl.addEventListener.calledWith('touchstart', instance.onTouchStart));
+  t.true(instance.linkEl.addEventListener.calledWith('touchend', instance.onTouchEnd));
 });
 
-test('removeGlobalEvents() removes event listener for `contextmenu`', t => {
+test('removeEvents() removes event listener for `contextmenu` and touch events for the link element', t => {
   global.window = {
     removeEventListener: sinon.spy(),
   };
+  instance.linkEl = {
+    removeEventListener: sinon.spy(),
+  };
 
-  instance.removeGlobalEvents();
+  instance.removeEvents();
 
   t.true(global.window.removeEventListener.calledWith('contextmenu', instance.onContextMenu));
+  t.true(instance.linkEl.removeEventListener.calledWith('touchstart', instance.onTouchStart));
+  t.true(instance.linkEl.removeEventListener.calledWith('touchend', instance.onTouchEnd));
 });
 
 test('navigateToUrl() redirects the page to the new url if there is `href` prop', t => {

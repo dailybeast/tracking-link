@@ -23,13 +23,19 @@ export default class TrackingLink extends Component {
   constructor(props) {
     super(props);
 
+    this.linkEl = null;
+    this.longTouchTimer = 0;
+
     this.state = {
       preventTouchTap: false,
     };
 
-    this.addGlobalEvents = this.addGlobalEvents.bind(this);
-    this.removeGlobalEvents = this.removeGlobalEvents.bind(this);
+    this.addEvents = this.addEvents.bind(this);
+    this.removeEvents = this.removeEvents.bind(this);
     this.onContextMenu = this.onContextMenu.bind(this);
+    this.onTouchStart = this.onTouchStart.bind(this);
+    this.onTouchEnd = this.onTouchEnd.bind(this);
+    this.onLongTouch = this.onLongTouch.bind(this);
     this.onTouchTap = this.onTouchTap.bind(this);
     this.navigateToUrl = this.navigateToUrl.bind(this);
     this.preventDefault = this.preventDefault.bind(this);
@@ -37,11 +43,11 @@ export default class TrackingLink extends Component {
   }
 
   componentDidMount() {
-    this.addGlobalEvents();
+    this.addEvents();
   }
 
   componentWillUnmount() {
-    this.removeGlobalEvents();
+    this.removeEvents();
   }
 
   /**
@@ -54,6 +60,24 @@ export default class TrackingLink extends Component {
     global.setTimeout(() => {
       this.setState({ preventTouchTap: false });
     }, this.props.contextMenuTimeout);
+  }
+
+  onLongTouch() {
+    this.setState({ preventTouchTap: true });
+  }
+
+  onTouchStart() {
+    this.longTouchTimer = global.setTimeout(this.onLongTouch, 1000);
+  }
+
+  onTouchEnd() {
+    global.window.clearTimeout(this.longTouchTimer);
+
+    if (this.state.preventTouchTap) {
+      global.setTimeout(() => {
+        this.setState({ preventTouchTap: false });
+      }, this.props.contextMenuTimeout);
+    }
   }
 
   onTouchTap(ev) {
@@ -75,12 +99,16 @@ export default class TrackingLink extends Component {
       .then(this.navigateToUrl(event));
   }
 
-  addGlobalEvents() {
+  addEvents() {
     global.window.addEventListener('contextmenu', this.onContextMenu);
+    this.linkEl.addEventListener('touchstart', this.onTouchStart);
+    this.linkEl.addEventListener('touchend', this.onTouchEnd);
   }
 
-  removeGlobalEvents() {
+  removeEvents() {
     global.window.removeEventListener('contextmenu', this.onContextMenu);
+    this.linkEl.removeEventListener('touchstart', this.onTouchStart);
+    this.linkEl.removeEventListener('touchend', this.onTouchEnd);
   }
 
   navigateToUrl(event) {
@@ -132,6 +160,7 @@ export default class TrackingLink extends Component {
         href={href}
         onTouchTap={onTouchTap}
         onClick={this.preventDefault}
+        ref={linkEl => { this.linkEl = linkEl; }}
       >
         {children}
       </a>
