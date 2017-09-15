@@ -37,13 +37,19 @@ var TrackingLink = function (_Component) {
 
     var _this = _possibleConstructorReturn(this, (TrackingLink.__proto__ || Object.getPrototypeOf(TrackingLink)).call(this, props));
 
+    _this.linkEl = null;
+    _this.longTouchTimer = 0;
+
     _this.state = {
       preventTouchTap: false
     };
 
-    _this.addGlobalEvents = _this.addGlobalEvents.bind(_this);
-    _this.removeGlobalEvents = _this.removeGlobalEvents.bind(_this);
+    _this.addEvents = _this.addEvents.bind(_this);
+    _this.removeEvents = _this.removeEvents.bind(_this);
     _this.onContextMenu = _this.onContextMenu.bind(_this);
+    _this.onTouchStart = _this.onTouchStart.bind(_this);
+    _this.onTouchEnd = _this.onTouchEnd.bind(_this);
+    _this.onLongTouch = _this.onLongTouch.bind(_this);
     _this.onTouchTap = _this.onTouchTap.bind(_this);
     _this.navigateToUrl = _this.navigateToUrl.bind(_this);
     _this.preventDefault = _this.preventDefault.bind(_this);
@@ -54,12 +60,12 @@ var TrackingLink = function (_Component) {
   _createClass(TrackingLink, [{
     key: 'componentDidMount',
     value: function componentDidMount() {
-      this.addGlobalEvents();
+      this.addEvents();
     }
   }, {
     key: 'componentWillUnmount',
     value: function componentWillUnmount() {
-      this.removeGlobalEvents();
+      this.removeEvents();
     }
 
     /**
@@ -77,6 +83,29 @@ var TrackingLink = function (_Component) {
       global.setTimeout(function () {
         _this2.setState({ preventTouchTap: false });
       }, this.props.contextMenuTimeout);
+    }
+  }, {
+    key: 'onLongTouch',
+    value: function onLongTouch() {
+      this.setState({ preventTouchTap: true });
+    }
+  }, {
+    key: 'onTouchStart',
+    value: function onTouchStart() {
+      this.longTouchTimer = global.setTimeout(this.onLongTouch, 1000);
+    }
+  }, {
+    key: 'onTouchEnd',
+    value: function onTouchEnd() {
+      var _this3 = this;
+
+      global.window.clearTimeout(this.longTouchTimer);
+
+      if (this.state.preventTouchTap) {
+        global.setTimeout(function () {
+          _this3.setState({ preventTouchTap: false });
+        }, this.props.contextMenuTimeout);
+      }
     }
   }, {
     key: 'onTouchTap',
@@ -97,22 +126,26 @@ var TrackingLink = function (_Component) {
       return Promise.race([trackingFunction(), this.resolveByTimeout(trackingTimeout)]).then(this.navigateToUrl(event));
     }
   }, {
-    key: 'addGlobalEvents',
-    value: function addGlobalEvents() {
+    key: 'addEvents',
+    value: function addEvents() {
       global.window.addEventListener('contextmenu', this.onContextMenu);
+      this.linkEl.addEventListener('touchstart', this.onTouchStart);
+      this.linkEl.addEventListener('touchend', this.onTouchEnd);
     }
   }, {
-    key: 'removeGlobalEvents',
-    value: function removeGlobalEvents() {
+    key: 'removeEvents',
+    value: function removeEvents() {
       global.window.removeEventListener('contextmenu', this.onContextMenu);
+      this.linkEl.removeEventListener('touchstart', this.onTouchStart);
+      this.linkEl.removeEventListener('touchend', this.onTouchEnd);
     }
   }, {
     key: 'navigateToUrl',
     value: function navigateToUrl(event) {
-      var _this3 = this;
+      var _this4 = this;
 
       return function () {
-        var _props2 = _this3.props,
+        var _props2 = _this4.props,
             href = _props2.href,
             targetBlank = _props2.targetBlank,
             preventDefault = _props2.preventDefault;
@@ -144,6 +177,8 @@ var TrackingLink = function (_Component) {
   }, {
     key: 'render',
     value: function render() {
+      var _this5 = this;
+
       var _props3 = this.props,
           children = _props3.children,
           href = _props3.href,
@@ -160,7 +195,10 @@ var TrackingLink = function (_Component) {
           className: className,
           href: href,
           onTouchTap: onTouchTap,
-          onClick: this.preventDefault
+          onClick: this.preventDefault,
+          ref: function ref(linkEl) {
+            _this5.linkEl = linkEl;
+          }
         },
         children
       );
