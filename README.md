@@ -8,8 +8,9 @@ TrackingLink is React component that helps to track clicks for links on the page
 ### Features
 * Supports ctrl/cmd + click to open url in a new tab/window
 * Navigates to the URL when tracking function is resolved or when the timeout is resolved first (this helps to avoid problems with analytics-blocking browser extensions or when your tracking function has failed)
-* Fixes the issue with the context menu in Firefox, mobile Chrome and mobile Safari when the right click (or long touch on mobile) upon the link triggers click event
 * Configurable timeouts
+* Fixes the issue with the context menu in Firefox, mobile Chrome and mobile Safari when the right click (or long touch on mobile) upon the link triggers click event
+* Fixes the bug of react-tap-event-plugin with the right click on Windows (it triggers touchTap event)
 
 ### Installation
 
