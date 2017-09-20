@@ -2,6 +2,8 @@ import PropTypes from 'prop-types';
 import React, { Component } from 'react';
 import classNames from 'classnames';
 
+export const MOUSE_RIGHT_BUTTON = 2;
+
 export default class TrackingLink extends Component {
   static propTypes = {
     children: PropTypes.node.isRequired,
@@ -84,6 +86,11 @@ export default class TrackingLink extends Component {
     const event = ev.nativeEvent;
 
     if (this.state.preventTouchTap) {
+      return false;
+    }
+
+    // on Windows right click triggers touchTap event (react-tap-event-plugin bug)
+    if (event.button === MOUSE_RIGHT_BUTTON) {
       return false;
     }
 
