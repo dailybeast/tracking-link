@@ -2,7 +2,7 @@ import React from 'react';
 import test from 'ava';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
-import TrackingLink from '../src';
+import TrackingLink, { MOUSE_RIGHT_BUTTON } from '../src';
 
 const CLASSNAME = 'test-class';
 const URL = 'something.org/path';
@@ -132,6 +132,15 @@ test.serial('onTouchTap() does not call navigateToUrl() when `preventTouchTap` i
   instance.navigateToUrl = sinon.spy();
 
   await instance.onTouchTap({ nativeEvent: {} });
+
+  t.false(instance.navigateToUrl.calledOnce);
+});
+
+test.serial('onTouchTap() does not call navigateToUrl() when it is a right click', async t => {
+  instance.setState({ preventTouchTap: false });
+  instance.navigateToUrl = sinon.spy();
+
+  await instance.onTouchTap({ nativeEvent: { button: MOUSE_RIGHT_BUTTON } });
 
   t.false(instance.navigateToUrl.calledOnce);
 });
