@@ -2,7 +2,7 @@ import React from 'react';
 import test from 'ava';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
-import TrackingLink, { MOUSE_RIGHT_BUTTON } from '../src';
+import TrackingLink, { MOUSE_RIGHT_BUTTON, EVENT } from '../src';
 
 const CLASSNAME = 'test-class';
 const URL = 'something.org/path';
@@ -155,9 +155,9 @@ test('addEvents() adds event listener for `contextmenu` and touch events for the
 
   instance.addEvents();
 
-  t.true(global.window.addEventListener.calledWith('contextmenu', instance.onContextMenu));
-  t.true(instance.linkEl.addEventListener.calledWith('touchstart', instance.onTouchStart));
-  t.true(instance.linkEl.addEventListener.calledWith('touchend', instance.onTouchEnd));
+  t.true(global.window.addEventListener.calledWith(EVENT.CONTEXT_MENU, instance.onContextMenu));
+  t.true(instance.linkEl.addEventListener.calledWith(EVENT.TOUCH_START, instance.onTouchStart));
+  t.true(instance.linkEl.addEventListener.calledWith(EVENT.TOUCH_END, instance.onTouchEnd));
 });
 
 test('removeEvents() removes event listener for `contextmenu` and touch events for the link element', t => {
@@ -170,9 +170,9 @@ test('removeEvents() removes event listener for `contextmenu` and touch events f
 
   instance.removeEvents();
 
-  t.true(global.window.removeEventListener.calledWith('contextmenu', instance.onContextMenu));
-  t.true(instance.linkEl.removeEventListener.calledWith('touchstart', instance.onTouchStart));
-  t.true(instance.linkEl.removeEventListener.calledWith('touchend', instance.onTouchEnd));
+  t.true(global.window.removeEventListener.calledWith(EVENT.CONTEXT_MENU, instance.onContextMenu));
+  t.true(instance.linkEl.removeEventListener.calledWith(EVENT.TOUCH_START, instance.onTouchStart));
+  t.true(instance.linkEl.removeEventListener.calledWith(EVENT.TOUCH_END, instance.onTouchEnd));
 });
 
 test('navigateToUrl() redirects the page to the new url if there is `href` prop', t => {

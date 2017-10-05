@@ -3,6 +3,11 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export const MOUSE_RIGHT_BUTTON = 2;
+export const EVENT = {
+  CONTEXT_MENU: 'contextmenu',
+  TOUCH_START: 'touchstart',
+  TOUCH_END: 'touchend',
+};
 
 export default class TrackingLink extends Component {
   static propTypes = {
@@ -107,15 +112,15 @@ export default class TrackingLink extends Component {
   }
 
   addEvents() {
-    global.window.addEventListener('contextmenu', this.onContextMenu);
-    this.linkEl.addEventListener('touchstart', this.onTouchStart);
-    this.linkEl.addEventListener('touchend', this.onTouchEnd);
+    global.window.addEventListener(EVENT.CONTEXT_MENU, this.onContextMenu);
+    this.linkEl.addEventListener(EVENT.TOUCH_START, this.onTouchStart);
+    this.linkEl.addEventListener(EVENT.TOUCH_END, this.onTouchEnd);
   }
 
   removeEvents() {
-    global.window.removeEventListener('contextmenu', this.onContextMenu);
-    this.linkEl.removeEventListener('touchstart', this.onTouchStart);
-    this.linkEl.removeEventListener('touchend', this.onTouchEnd);
+    global.window.removeEventListener(EVENT.CONTEXT_MENU, this.onContextMenu);
+    this.linkEl.removeEventListener(EVENT.TOUCH_START, this.onTouchStart);
+    this.linkEl.removeEventListener(EVENT.TOUCH_END, this.onTouchEnd);
   }
 
   navigateToUrl(event) {
