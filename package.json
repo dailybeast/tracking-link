@@ -6,7 +6,7 @@
   "scripts": {
     "build": "babel src --out-dir dist",
     "prepare": "npm run build",
-    "prepublishOnly": "npm run test",
+    "prepublishOnly": "npm run build && npm run test",
     "lint": "eslint src",
     "ava": "NODE_ENV=test ava --verbose",
     "test": "npm run lint && npm run ava"
