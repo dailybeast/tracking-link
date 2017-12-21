@@ -87,15 +87,15 @@ export default class TrackingLink extends Component {
     }
   }
 
-  onTouchTap(ev) {
-    const event = ev.nativeEvent;
+  onTouchTap(event) {
+    const nativeEvent = event.nativeEvent;
 
     if (this.state.preventTouchTap) {
       return false;
     }
 
     // on Windows right click triggers touchTap event (react-tap-event-plugin bug)
-    if (event.button === MOUSE_RIGHT_BUTTON) {
+    if (nativeEvent.button === MOUSE_RIGHT_BUTTON) {
       return false;
     }
 
@@ -105,10 +105,10 @@ export default class TrackingLink extends Component {
     // in case of tracking-blocking browser extensions or failure to load analytics scripts
     return Promise
       .race([
-        trackingFunction(),
+        trackingFunction(event),
         this.resolveByTimeout(trackingTimeout),
       ])
-      .then(this.navigateToUrl(event));
+      .then(this.navigateToUrl(nativeEvent));
   }
 
   addEvents() {

@@ -123,6 +123,7 @@ test.serial('onTouchTap() calls `onTouchTap` prop and then calls navigateToUrl()
   await instance.onTouchTap(eventMock);
 
   t.true(onTouchTapStub.calledOnce);
+  t.true(onTouchTapStub.calledWith(eventMock));
   t.true(instance.navigateToUrl.calledWith(eventMock.nativeEvent));
   t.true(navigateToUrlSpy.calledOnce);
 });
