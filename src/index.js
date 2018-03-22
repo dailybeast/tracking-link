@@ -47,6 +47,8 @@ export default class TrackingLink extends Component {
     this.navigateToUrl = this.navigateToUrl.bind(this);
     this.preventDefault = this.preventDefault.bind(this);
     this.resolveByTimeout = this.resolveByTimeout.bind(this);
+    this.isMouseWheelClick = this.isMouseWheelClick.bind(this);
+    this.isChrome = this.isChrome.bind(this);
   }
 
   componentDidMount() {
@@ -132,25 +134,53 @@ export default class TrackingLink extends Component {
       } = this.props;
 
       const ctrlKeyPressed = event.metaKey || event.ctrlKey;
+      const mouseWheelClick = this.isMouseWheelClick(event);
+      const isChrome = this.isChrome();
+
+      // in chrome it's not possible to prevent opening a new tab on mouse wheel click
+      // so we prevent opening url in the current tab and allow to open it in a new tab by Chrome
+      // for other browsers we'll open in a new tab
+      if (mouseWheelClick && isChrome) {
+        return false;
+      }
 
       if (href && !preventDefault) {
-        if (targetBlank || ctrlKeyPressed) {
+        if (targetBlank || ctrlKeyPressed || (mouseWheelClick && !isChrome)) {
           global.window.open(href, '_blank');
         } else {
           global.location.href = href;
         }
       }
+
+      return true;
     };
   }
 
   preventDefault(event) {
     event.preventDefault();
+    return false;
   }
 
   resolveByTimeout(timeout) {
     return new Promise(resolve => {
       global.setTimeout(resolve, timeout);
     });
+  }
+
+  isMouseWheelClick(event) {
+    let mouseWheelClick = false;
+
+    if (event.which && event.which === 2) {
+      mouseWheelClick = true;
+    } else if (event.button && event.button === 1) {
+      mouseWheelClick = true;
+    }
+
+    return mouseWheelClick;
+  }
+
+  isChrome() {
+    return global.navigator.userAgent.indexOf('Chrome') > -1;
   }
 
   render() {
