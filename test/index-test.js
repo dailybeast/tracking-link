@@ -178,6 +178,7 @@ test('removeEvents() removes event listener for `contextmenu` and touch events f
 
 test('navigateToUrl() redirects the page to the new url if there is `href` prop', t => {
   global.location = { href: 'old-url.com' };
+  global.navigator = { userAgent: 'Safari' };
   global.window = { open: sinon.spy() };
 
   instance.navigateToUrl({})();
@@ -188,6 +189,7 @@ test('navigateToUrl() redirects the page to the new url if there is `href` prop'
 
 test('navigateToUrl() opens new window if there is `href` and `targetBlank` prop', t => {
   global.location = { href: 'old-url.com' };
+  global.navigator = { userAgent: 'Safari' };
   global.window = { open: sinon.spy() };
 
   trackingLink.setProps({ targetBlank: true });
@@ -199,6 +201,7 @@ test('navigateToUrl() opens new window if there is `href` and `targetBlank` prop
 
 test('navigateToUrl() opens new window if there is `href` and ctrl key is pressed', t => {
   global.location = { href: 'old-url.com' };
+  global.navigator = { userAgent: 'Safari' };
   global.window = { open: sinon.spy() };
 
   instance.navigateToUrl({ ctrlKey: true })();
@@ -209,6 +212,7 @@ test('navigateToUrl() opens new window if there is `href` and ctrl key is presse
 
 test('navigateToUrl() opens new window if there is `href` and meta key is pressed', t => {
   global.location = { href: 'old-url.com' };
+  global.navigator = { userAgent: 'Safari' };
   global.window = { open: sinon.spy() };
 
   instance.navigateToUrl({ metaKey: true })();
@@ -217,8 +221,22 @@ test('navigateToUrl() opens new window if there is `href` and meta key is presse
   t.true(global.window.open.calledWith(URL, '_blank'));
 });
 
+test('navigateToUrl() opens new window if isMouseWheelClick() returns true and isChrome() returns false', t => {
+  global.location = { href: 'old-url.com' };
+  global.navigator = { userAgent: 'Safari' };
+  global.window = { open: sinon.spy() };
+  instance.isMouseWheelClick = () => true;
+  instance.isChrome = () => false;
+
+  instance.navigateToUrl({})();
+
+  t.is(global.location.href, 'old-url.com');
+  t.true(global.window.open.calledWith(URL, '_blank'));
+});
+
 test('navigateToUrl() does nothing if there is `preventDefault` prop', t => {
   global.location = { href: 'old-url.com' };
+  global.navigator = { userAgent: 'Safari' };
   global.window = { open: sinon.spy() };
 
   trackingLink.setProps({ preventDefault: true });
@@ -230,6 +248,7 @@ test('navigateToUrl() does nothing if there is `preventDefault` prop', t => {
 
 test('navigateToUrl() does nothing if there is no `href` prop', t => {
   global.location = { href: 'old-url.com' };
+  global.navigator = { userAgent: 'Safari' };
   global.window = { open: sinon.spy() };
 
   trackingLink.setProps({ href: undefined });
@@ -239,11 +258,19 @@ test('navigateToUrl() does nothing if there is no `href` prop', t => {
   t.false(global.window.open.called);
 });
 
-test('preventDefault() calls `preventDefault` function for the event it receives', t => {
+test('navigateToUrl() returns false when isMouseWheelClick() and isChrome() both return true', t => {
+  instance.isMouseWheelClick = () => true;
+  instance.isChrome = () => true;
+
+  t.false(instance.navigateToUrl({})());
+});
+
+test('preventDefault() calls `preventDefault` function for the event it receives and returns false', t => {
   const eventMock = { preventDefault: sinon.spy() };
 
-  instance.preventDefault(eventMock);
+  const result = instance.preventDefault(eventMock);
 
+  t.false(result);
   t.true(eventMock.preventDefault.calledOnce);
 });
 
@@ -251,4 +278,23 @@ test('resolveByTimeout() returns Promise that resolves by timeout', async t => {
   await instance.resolveByTimeout(0);
 
   t.pass();
+});
+
+test('isMouseWheelClick() returns true only when `event.which`=2 or `event.button`=1', t => {
+  t.false(instance.isMouseWheelClick({}));
+  t.false(instance.isMouseWheelClick({ which: 1 }));
+  t.true(instance.isMouseWheelClick({ which: 2 }));
+  t.false(instance.isMouseWheelClick({ button: 2 }));
+  t.true(instance.isMouseWheelClick({ button: 1 }));
+});
+
+test('isChrome() returns true only when userAgent contains string `Chrome`', t => {
+  global.navigator = { userAgent: 'NetScape 6' };
+  t.false(instance.isChrome());
+
+  global.navigator = { userAgent: 'Mozilla 2, Gecko 3' };
+  t.false(instance.isChrome());
+
+  global.navigator = { userAgent: 'Mozilla 2, Chrome 45' };
+  t.true(instance.isChrome());
 });
