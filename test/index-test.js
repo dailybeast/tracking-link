@@ -24,7 +24,8 @@ test.beforeEach(() => {
       contextMenuTimeout={0}
     >
       <button className="tracked-button" />
-    </TrackingLink>
+    </TrackingLink>,
+    { disableLifecycleMethods: true }
   );
   instance = trackingLink.instance();
 });
@@ -40,10 +41,10 @@ test('renders link element with className=`TrackingLink`', t => {
   trackingLink.setProps({ onTouchTap: undefined });
   t.is(trackingLink.prop('onTouchTap'), undefined);
 
-  t.is(typeof trackingLink.node.ref, 'function');
+  t.is(typeof trackingLink.getElement().ref, 'function');
 
   const linkEl = 'linkEl';
-  trackingLink.node.ref(linkEl);
+  trackingLink.getElement().ref(linkEl);
 
   t.is(instance.linkEl, linkEl);
 });
