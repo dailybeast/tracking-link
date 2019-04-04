@@ -14,7 +14,7 @@ export default class TrackingLink extends Component {
     children: PropTypes.node.isRequired,
     href: PropTypes.string.isRequired,
     className: PropTypes.string,
-    onTouchTap: PropTypes.func,
+    onClick: PropTypes.func,
     targetBlank: PropTypes.bool,
     preventDefault: PropTypes.bool,
     trackingTimeout: PropTypes.number,
@@ -43,9 +43,8 @@ export default class TrackingLink extends Component {
     this.onTouchStart = this.onTouchStart.bind(this);
     this.onTouchEnd = this.onTouchEnd.bind(this);
     this.onLongTouch = this.onLongTouch.bind(this);
-    this.onTouchTap = this.onTouchTap.bind(this);
+    this.onClick = this.onClick.bind(this);
     this.navigateToUrl = this.navigateToUrl.bind(this);
-    this.preventDefault = this.preventDefault.bind(this);
     this.resolveByTimeout = this.resolveByTimeout.bind(this);
     this.isMouseWheelClick = this.isMouseWheelClick.bind(this);
     this.isChrome = this.isChrome.bind(this);
@@ -89,7 +88,8 @@ export default class TrackingLink extends Component {
     }
   }
 
-  onTouchTap(event) {
+  onClick(event) {
+    if (this.props.preventDefault) event.preventDefault();
     const nativeEvent = event.nativeEvent;
 
     if (this.state.preventTouchTap) {
@@ -101,7 +101,7 @@ export default class TrackingLink extends Component {
       return false;
     }
 
-    const { onTouchTap: trackingFunction, trackingTimeout } = this.props;
+    const { onClick: trackingFunction, trackingTimeout } = this.props;
 
     // try to track the click but with the timeout
     // in case of tracking-blocking browser extensions or failure to load analytics scripts
@@ -156,11 +156,6 @@ export default class TrackingLink extends Component {
     };
   }
 
-  preventDefault(event) {
-    event.preventDefault();
-    return false;
-  }
-
   resolveByTimeout(timeout) {
     return new Promise(resolve => {
       global.setTimeout(resolve, timeout);
@@ -188,20 +183,19 @@ export default class TrackingLink extends Component {
       children,
       href,
       className: addtionalClassName,
-      onTouchTap: trackingFunction,
+      onClick: trackingFunction,
     } = this.props;
 
     const className = classNames('TrackingLink', {
       [addtionalClassName]: !!addtionalClassName,
     });
-    const onTouchTap = trackingFunction ? this.onTouchTap : undefined;
+    const onClick = trackingFunction ? this.onClick : undefined;
 
     return (
       <a
         className={className}
         href={href}
-        onTouchTap={onTouchTap}
-        onClick={this.preventDefault}
+        onClick={onClick}
         ref={linkEl => { this.linkEl = linkEl; }}
       >
         {children}
