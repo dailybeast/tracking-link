@@ -39,7 +39,8 @@ export default class TrackingLink extends Component {
   }
 
   onClick(event) {
-    if (this.props.preventDefault) event.preventDefault();
+    event.preventDefault();
+
     const nativeEvent = event.nativeEvent;
 
     // on Windows right click triggers touchTap event (react-tap-event-plugin bug)
