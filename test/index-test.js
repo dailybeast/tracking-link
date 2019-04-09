@@ -2,12 +2,12 @@ import React from 'react';
 import test from 'ava';
 import sinon from 'sinon';
 import { shallow } from 'enzyme';
-import TrackingLink, { MOUSE_RIGHT_BUTTON, EVENT } from '../src';
+import TrackingLink from '../src';
 
 const CLASSNAME = 'test-class';
 const URL = 'something.org/path';
 
-const onTouchTapStub = sinon.stub().returns(Promise.resolve());
+const onClickStub = sinon.stub().returns(Promise.resolve());
 
 let trackingLink;
 let instance;
@@ -17,7 +17,7 @@ test.beforeEach(() => {
     <TrackingLink
       className={CLASSNAME}
       href={URL}
-      onTouchTap={onTouchTapStub}
+      onClick={onClickStub}
       targetBlank={false}
       preventDefault={false}
       trackingTimeout={0}
@@ -35,11 +35,7 @@ test('renders link element with className=`TrackingLink`', t => {
   t.true(trackingLink.hasClass('TrackingLink'));
   t.true(trackingLink.hasClass(CLASSNAME));
   t.is(trackingLink.prop('href'), URL);
-  t.is(trackingLink.prop('onTouchTap').toString(), instance.onTouchTap.toString());
-  t.is(trackingLink.prop('onClick').toString(), instance.preventDefault.toString());
-
-  trackingLink.setProps({ onTouchTap: undefined });
-  t.is(trackingLink.prop('onTouchTap'), undefined);
+  t.is(trackingLink.prop('onClick').toString(), instance.onClick.toString());
 
   t.is(typeof trackingLink.getElement().ref, 'function');
 
@@ -53,128 +49,25 @@ test('renders children', t => {
   t.is(trackingLink.find('.tracked-button').length, 1);
 });
 
-test('componentDidMount() calls addEvents()', async t => {
-  instance.addEvents = sinon.spy();
-
-  instance.componentDidMount();
-
-  t.true(instance.addEvents.calledOnce);
-});
-
-test('componentWillUnmount() calls removeEvents()', async t => {
-  instance.removeEvents = sinon.spy();
-
-  instance.componentWillUnmount();
-
-  t.true(instance.removeEvents.calledOnce);
-});
-
-test.cb('onContextMenu() sets `preventTouchTap` state to true and sets timeout after which sets `preventTouchTap` state to false', t => {
-  t.false(instance.state.preventTouchTap);
-
-  instance.onContextMenu();
-
-  t.true(instance.state.preventTouchTap);
-
-  global.setTimeout(() => {
-    t.false(instance.state.preventTouchTap);
-    t.end();
-  }, 0);
-});
-
-test.serial('onLongTouch() sets `preventTouchTap` state to true', t => {
-  instance.setState({ preventTouchTap: false });
-
-  instance.onLongTouch();
-
-  t.true(instance.state.preventTouchTap);
-});
-
-test.serial('onTouchStart() starts timer and assigns its id to the `longTouchTimer` instance variable', t => {
-  instance.longTouchTimer = 0;
-
-  instance.onTouchStart();
-
-  t.true(instance.longTouchTimer !== 0);
-
-  global.clearTimeout(instance.longTouchTimer);
-});
-
-test.cb('onTouchEnd() sets timeout after which sets `preventTouchTap` state to false', t => {
-  instance.setState({ preventTouchTap: true });
-
-  instance.onContextMenu();
-
-  global.setTimeout(() => {
-    t.false(instance.state.preventTouchTap);
-    t.end();
-  }, 0);
-});
-
-test.serial('onTouchTap() calls `onTouchTap` prop and then calls navigateToUrl() with nativeEvent', async t => {
+test.serial('onClick() calls `onClick` prop and then calls navigateToUrl() with nativeEvent', async t => {
   const navigateToUrlSpy = sinon.spy();
+  const preventDefaultSpy = sinon.spy();
   instance.navigateToUrl = sinon.stub().returns(navigateToUrlSpy);
 
   const eventMock = {
+    preventDefault: preventDefaultSpy,
     nativeEvent: {
       button: 1,
     }
   };
 
-  await instance.onTouchTap(eventMock);
+  await instance.onClick(eventMock);
 
-  t.true(onTouchTapStub.calledOnce);
-  t.true(onTouchTapStub.calledWith(eventMock));
+  t.true(onClickStub.calledOnce);
+  t.true(onClickStub.calledWith(eventMock));
   t.true(instance.navigateToUrl.calledWith(eventMock.nativeEvent));
+  t.true(preventDefaultSpy.calledOnce);
   t.true(navigateToUrlSpy.calledOnce);
-});
-
-test.serial('onTouchTap() does not call navigateToUrl() when `preventTouchTap` is true', async t => {
-  instance.setState({ preventTouchTap: true });
-  instance.navigateToUrl = sinon.spy();
-
-  await instance.onTouchTap({ nativeEvent: {} });
-
-  t.false(instance.navigateToUrl.calledOnce);
-});
-
-test.serial('onTouchTap() does not call navigateToUrl() when it is a right click', async t => {
-  instance.setState({ preventTouchTap: false });
-  instance.navigateToUrl = sinon.spy();
-
-  await instance.onTouchTap({ nativeEvent: { button: MOUSE_RIGHT_BUTTON } });
-
-  t.false(instance.navigateToUrl.calledOnce);
-});
-
-test('addEvents() adds event listener for `contextmenu` and touch events for the link element', t => {
-  global.window = {
-    addEventListener: sinon.spy(),
-  };
-  instance.linkEl = {
-    addEventListener: sinon.spy(),
-  };
-
-  instance.addEvents();
-
-  t.true(global.window.addEventListener.calledWith(EVENT.CONTEXT_MENU, instance.onContextMenu));
-  t.true(instance.linkEl.addEventListener.calledWith(EVENT.TOUCH_START, instance.onTouchStart));
-  t.true(instance.linkEl.addEventListener.calledWith(EVENT.TOUCH_END, instance.onTouchEnd));
-});
-
-test('removeEvents() removes event listener for `contextmenu` and touch events for the link element', t => {
-  global.window = {
-    removeEventListener: sinon.spy(),
-  };
-  instance.linkEl = {
-    removeEventListener: sinon.spy(),
-  };
-
-  instance.removeEvents();
-
-  t.true(global.window.removeEventListener.calledWith(EVENT.CONTEXT_MENU, instance.onContextMenu));
-  t.true(instance.linkEl.removeEventListener.calledWith(EVENT.TOUCH_START, instance.onTouchStart));
-  t.true(instance.linkEl.removeEventListener.calledWith(EVENT.TOUCH_END, instance.onTouchEnd));
 });
 
 test('navigateToUrl() redirects the page to the new url if there is `href` prop', t => {
@@ -264,15 +157,6 @@ test('navigateToUrl() returns false when isMouseWheelClick() and isChrome() both
   instance.isChrome = () => true;
 
   t.false(instance.navigateToUrl({})());
-});
-
-test('preventDefault() calls `preventDefault` function for the event it receives and returns false', t => {
-  const eventMock = { preventDefault: sinon.spy() };
-
-  const result = instance.preventDefault(eventMock);
-
-  t.false(result);
-  t.true(eventMock.preventDefault.calledOnce);
 });
 
 test('resolveByTimeout() returns Promise that resolves by timeout', async t => {
