@@ -3,11 +3,6 @@ import PropTypes from 'prop-types';
 import classNames from 'classnames';
 
 export const MOUSE_RIGHT_BUTTON = 2;
-export const EVENT = {
-  CONTEXT_MENU: 'contextmenu',
-  TOUCH_START: 'touchstart',
-  TOUCH_END: 'touchend',
-};
 
 export default class TrackingLink extends Component {
   static propTypes = {
@@ -29,7 +24,6 @@ export default class TrackingLink extends Component {
     super(props);
 
     this.linkEl = null;
-    this.longTouchTimer = 0;
 
     this.onClick = this.onClick.bind(this);
     this.navigateToUrl = this.navigateToUrl.bind(this);

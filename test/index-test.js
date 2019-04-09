@@ -51,9 +51,11 @@ test('renders children', t => {
 
 test.serial('onClick() calls `onClick` prop and then calls navigateToUrl() with nativeEvent', async t => {
   const navigateToUrlSpy = sinon.spy();
+  const preventDefaultSpy = sinon.spy();
   instance.navigateToUrl = sinon.stub().returns(navigateToUrlSpy);
 
   const eventMock = {
+    preventDefault: preventDefaultSpy,
     nativeEvent: {
       button: 1,
     }
@@ -64,6 +66,7 @@ test.serial('onClick() calls `onClick` prop and then calls navigateToUrl() with 
   t.true(onClickStub.calledOnce);
   t.true(onClickStub.calledWith(eventMock));
   t.true(instance.navigateToUrl.calledWith(eventMock.nativeEvent));
+  t.true(preventDefaultSpy.calledOnce);
   t.true(navigateToUrlSpy.calledOnce);
 });
 
