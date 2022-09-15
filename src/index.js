@@ -30,6 +30,9 @@ export default class TrackingLink extends Component {
     this.resolveByTimeout = this.resolveByTimeout.bind(this);
     this.isMouseWheelClick = this.isMouseWheelClick.bind(this);
     this.isChrome = this.isChrome.bind(this);
+    this.isSafari = this.isSafari.bind(this);
+    this.isFloatingNeedHelpBtn = this.isFloatingNeedHelpBtn.bind(this);
+    this.windowRef = null;
   }
 
   onClick(event) {
@@ -42,7 +45,19 @@ export default class TrackingLink extends Component {
       return false;
     }
 
-    const { onClick: trackingFunction, trackingTimeout } = this.props;
+    const { onClick: trackingFunction, trackingTimeout, className } = this.props;
+
+    const isSafari = this.isSafari();
+    const isFloatingNeedHelpBtn = this.isFloatingNeedHelpBtn(className);
+
+    if (isSafari && isFloatingNeedHelpBtn) {
+      // Safari blocks any window.open() calls made inside an async call
+      // the workaround is to call window.open() prior to the
+      // async call and then set the window location/url when the promise resolves. 
+      // we're specifically targeting the floating 'NEED HELP?' button on Safari
+      // because this solution affects UX too greatly to use across the board
+      this.windowRef = global.window.open();
+    }
 
     // try to track the click but with the timeout
     // in case of tracking-blocking browser extensions or failure to load analytics scripts
@@ -75,8 +90,22 @@ export default class TrackingLink extends Component {
 
       if (href && !preventDefault) {
         if (targetBlank || ctrlKeyPressed || (mouseWheelClick && !isChrome)) {
-          global.window.open(href, '_blank');
+          
+          // aka if we've detected Safari and the floating 'NEED HELP?' button
+          if (this.windowRef) {
+            this.windowRef.location = href;
+          } else {
+            global.window.open(href, '_blank');
+          }
+
         } else {
+
+          // necessary to prevent blank page from loading 
+          if (this.windowRef) {
+            this.windowRef.close();
+            this.windowRef = null;
+          }
+
           global.location.href = href;
         }
       }
@@ -105,6 +134,20 @@ export default class TrackingLink extends Component {
 
   isChrome() {
     return global.navigator.userAgent.indexOf('Chrome') > -1;
+  }
+
+  isSafari() {
+    return global.navigator.userAgent.indexOf('Safari') > -1;
+  }
+
+  isFloatingNeedHelpBtn(className) {
+    if (!className) {
+      return false;
+    }
+
+    const floatingHelpBtn = 'DashboardPage__floating-help-btn'.toLowerCase();
+
+    return className.toLowerCase() === floatingHelpBtn;
   }
 
   render() {
