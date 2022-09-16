@@ -31,7 +31,6 @@ export default class TrackingLink extends Component {
     this.isMouseWheelClick = this.isMouseWheelClick.bind(this);
     this.isChrome = this.isChrome.bind(this);
     this.isSafari = this.isSafari.bind(this);
-    this.isFloatingNeedHelpBtn = this.isFloatingNeedHelpBtn.bind(this);
     this.windowRef = null;
   }
 
@@ -45,17 +44,14 @@ export default class TrackingLink extends Component {
       return false;
     }
 
-    const { onClick: trackingFunction, trackingTimeout, className } = this.props;
+    const { onClick: trackingFunction, trackingTimeout, targetBlank } = this.props;
 
     const isSafari = this.isSafari();
-    const isFloatingNeedHelpBtn = this.isFloatingNeedHelpBtn(className);
 
-    if (isSafari && isFloatingNeedHelpBtn) {
-      // Safari blocks any window.open() calls made inside an async call
-      // the workaround is to call window.open() prior to the
+    if (targetBlank && isSafari) {
+      // Safari blocks any window.open() calls made inside an async call.
+      // the workaround is to create a ref to window.open() prior to the
       // async call and then set the window location/url when the promise resolves. 
-      // we're specifically targeting the floating 'NEED HELP?' button on Safari
-      // because this solution affects UX too greatly to use across the board
       this.windowRef = global.window.open();
     }
 
@@ -88,26 +84,20 @@ export default class TrackingLink extends Component {
         return false;
       }
 
-      if (href && !preventDefault) {
-        if (targetBlank || ctrlKeyPressed || (mouseWheelClick && !isChrome)) {
-          
-          // aka if we've detected Safari and the floating 'NEED HELP?' button
-          if (this.windowRef) {
-            this.windowRef.location = href;
-          } else {
-            global.window.open(href, '_blank');
-          }
+      if (!(href && !preventDefault)) return;
 
-        } else {
+      if (targetBlank || ctrlKeyPressed || (mouseWheelClick && !isChrome)) {
+        
+        // if this.windowRef is truthy we've detected Safari as the browser and 
+        // will use location.assign(href) to open a new tab. 
+        this.windowRef ? this.windowRef.location.assign(href) : global.window.open(href, '_blank'); 
 
-          // necessary to prevent blank page from loading 
-          if (this.windowRef) {
-            this.windowRef.close();
-            this.windowRef = null;
-          }
+      } else {
 
-          global.location.href = href;
-        }
+        // necessary to prevent blank page from loading 
+        this.windowRef ? this.windowRef.close() : null; 
+        
+        global.location.assign(href);
       }
 
       return true;
@@ -138,16 +128,6 @@ export default class TrackingLink extends Component {
 
   isSafari() {
     return global.navigator.userAgent.indexOf('Safari') > -1;
-  }
-
-  isFloatingNeedHelpBtn(className) {
-    if (!className) {
-      return false;
-    }
-
-    const floatingHelpBtn = 'DashboardPage__floating-help-btn'.toLowerCase();
-
-    return className.toLowerCase() === floatingHelpBtn;
   }
 
   render() {
