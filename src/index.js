@@ -30,6 +30,8 @@ export default class TrackingLink extends Component {
     this.resolveByTimeout = this.resolveByTimeout.bind(this);
     this.isMouseWheelClick = this.isMouseWheelClick.bind(this);
     this.isChrome = this.isChrome.bind(this);
+    this.isSafari = this.isSafari.bind(this);
+    this.windowRef = null;
   }
 
   onClick(event) {
@@ -42,7 +44,16 @@ export default class TrackingLink extends Component {
       return false;
     }
 
-    const { onClick: trackingFunction, trackingTimeout } = this.props;
+    const { onClick: trackingFunction, trackingTimeout, targetBlank } = this.props;
+
+    const isSafari = this.isSafari();
+
+    if (targetBlank && isSafari) {
+      // Safari blocks any window.open() calls made inside an async call.
+      // the workaround is to create a ref to window.open() prior to the
+      // async call and then set the window location/url when the promise resolves. 
+      this.windowRef = global.window.open();
+    }
 
     // try to track the click but with the timeout
     // in case of tracking-blocking browser extensions or failure to load analytics scripts
@@ -73,12 +84,20 @@ export default class TrackingLink extends Component {
         return false;
       }
 
-      if (href && !preventDefault) {
-        if (targetBlank || ctrlKeyPressed || (mouseWheelClick && !isChrome)) {
-          global.window.open(href, '_blank');
-        } else {
-          global.location.href = href;
-        }
+      if (!(href && !preventDefault)) return;
+
+      if (targetBlank || ctrlKeyPressed || (mouseWheelClick && !isChrome)) {
+        
+        // if this.windowRef is truthy we've detected Safari as the browser and 
+        // will use location.assign(href) to open a new tab. 
+        this.windowRef ? this.windowRef.location.assign(href) : global.window.open(href, '_blank'); 
+
+      } else {
+
+        // necessary to prevent blank page from loading 
+        this.windowRef ? this.windowRef.close() : null; 
+        
+        global.location.assign(href);
       }
 
       return true;
@@ -105,6 +124,10 @@ export default class TrackingLink extends Component {
 
   isChrome() {
     return global.navigator.userAgent.indexOf('Chrome') > -1;
+  }
+
+  isSafari() {
+    return global.navigator.userAgent.indexOf('Safari') > -1;
   }
 
   render() {
