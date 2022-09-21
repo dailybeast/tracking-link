@@ -90,7 +90,7 @@ export default class TrackingLink extends Component {
         // if this.windowRef is truthy we've detected Safari as the browser and
         // will use location.assign(href) to open a new tab.
         if (this.windowRef) {
-          this.windowRef.location.assign(href);
+          this.windowRef.location = href;
         } else {
           global.window.open(href, '_blank');
         }
@@ -100,7 +100,7 @@ export default class TrackingLink extends Component {
           this.windowRef.close();
         }
 
-        global.location.assign(href);
+        global.location.href = href;
       }
 
       return true;
