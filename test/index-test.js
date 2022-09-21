@@ -50,6 +50,8 @@ test('renders children', t => {
 });
 
 test.serial('onClick() calls `onClick` prop and then calls navigateToUrl() with nativeEvent', async t => {
+  global.navigator = { userAgent: 'Safari' };
+  
   const navigateToUrlSpy = sinon.spy();
   const preventDefaultSpy = sinon.spy();
   instance.navigateToUrl = sinon.stub().returns(navigateToUrlSpy);
