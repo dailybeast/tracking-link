@@ -140,7 +140,7 @@ export default class TrackingLink extends Component {
       href,
       className: addtionalClassName,
       onClick: trackingFunction,
-      ariaLabel
+      ariaLabel = ''
     } = this.props;
 
     const className = classNames('TrackingLink', {
@@ -150,7 +150,7 @@ export default class TrackingLink extends Component {
 
     return (
       <a
-        aria-label={ariaLabel || ''}
+        aria-label={ariaLabel}
         className={className}
         href={href}
         onClick={onClick}
