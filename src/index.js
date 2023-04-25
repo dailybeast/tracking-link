@@ -6,6 +6,7 @@ export const MOUSE_RIGHT_BUTTON = 2;
 
 export default class TrackingLink extends Component {
   static propTypes = {
+    ariaLabel: PropTypes.string,
     children: PropTypes.node.isRequired,
     href: PropTypes.string.isRequired,
     className: PropTypes.string,
@@ -139,6 +140,7 @@ export default class TrackingLink extends Component {
       href,
       className: addtionalClassName,
       onClick: trackingFunction,
+      ariaLabel = ''
     } = this.props;
 
     const className = classNames('TrackingLink', {
@@ -148,6 +150,7 @@ export default class TrackingLink extends Component {
 
     return (
       <a
+        aria-label={ariaLabel}
         className={className}
         href={href}
         onClick={onClick}
