@@ -43,6 +43,8 @@ Now when you click the image, TrackingLink will call your tracking function and 
 
 ```javascript
 propTypes = {
+  // accessibility label applied to <a> tag, describing its purpose or destination for screen reader users
+  ariaLabel: PropTypes.string,
   // a React node you want to wrap into <a> link
   children: PropTypes.node.isRequired,
   // href - url where navigate when tracking function is resolved
