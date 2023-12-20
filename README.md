@@ -1,5 +1,7 @@
 # DEPRECATED ⛔
 
+This package is no longer supported. 
+
 [![npm Version](https://img.shields.io/npm/v/tracking-link.svg)](https://www.npmjs.com/package/tracking-link) [![License](https://img.shields.io/npm/l/tracking-link.svg)](https://www.npmjs.com/package/tracking-link)
 
 TrackingLink is React component that helps to track clicks for links on the page.
