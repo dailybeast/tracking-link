@@ -1,4 +1,4 @@
-# TrackingLink
+# DEPRECATED ⛔
 
 [![npm Version](https://img.shields.io/npm/v/tracking-link.svg)](https://www.npmjs.com/package/tracking-link) [![License](https://img.shields.io/npm/l/tracking-link.svg)](https://www.npmjs.com/package/tracking-link)
 
